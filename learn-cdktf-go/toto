@@ -1,0 +1,4 @@
+echo 'resource "ovh_cloud_project_kube" "my_kube_cluster" {
+  name         = "my_kube_cluster_cdktf"
+  region       = "GRA7"
+}' | cdktf convert --language go --provider 'ovh/ovh@ ~> 0.37.0'
