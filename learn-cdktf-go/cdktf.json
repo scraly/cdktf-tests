@@ -5,7 +5,8 @@
   "projectId": "258e51bf-cec5-4771-ad56-c66bde96fbd9",
   "sendCrashReports": "true",
   "terraformProviders": [
-    "ovh/ovh@~>0.37.0"
+    "ovh/ovh@~>0.37.0",
+    "hashicorp/local@ ~> 2.1.0"
   ],
   "terraformModules": [],
   "context": {}
