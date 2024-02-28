@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path"
 
 	"cdk.tf/go/stack/generated/hashicorp/local/file"
 	local "cdk.tf/go/stack/generated/hashicorp/local/provider"
@@ -45,7 +46,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 	//Save the kubeconfig file in your current directory
 	pwd, _ := os.Getwd()
 	file.NewFile(stack, jsii.String("kubeconfig"), &file.FileConfig{
-		Filename: jsii.String(pwd + "/kubeconfig.yaml"),
+		Filename: jsii.String(path.Join(pwd, "kubeconfig.yaml")),
 		Content:  kube.Kubeconfig(),
 	})
 
@@ -70,7 +71,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 func main() {
 	app := cdktf.NewApp(nil)
 
-	NewMyStack(app, "learn-cdktf-go")
+	NewMyStack(app, "ovhcloud")
 
 	app.Synth()
 }
