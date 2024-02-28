@@ -28,11 +28,10 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 	// Initialize the Local provider
 	local.NewLocalProvider(stack, jsii.String("local"), &local.LocalProviderConfig{})
 
-	//Get serviceName from the env var OVH_CLOUD_PROJECT_SERVICE
+	// Get serviceName from the env var OVH_CLOUD_PROJECT_SERVICE
 	serviceName := os.Getenv("OVH_CLOUD_PROJECT_SERVICE")
 
 	// Deploy a new Kubernetes cluster
-	//TODO: Handle serviceName with a variable
 	kube := cloudprojectkube.NewCloudProjectKube(stack, jsii.String("my_desired_cluster"), &cloudprojectkube.CloudProjectKubeConfig{
 		ServiceName: jsii.String(serviceName),
 		Name:        jsii.String("my_desired_cluster"),
@@ -43,13 +42,10 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		Value: kube.Version(),
 	})
 
-	//cdktf.NewTerraformOutput(stack, jsii.String("kubeconfig_file"), &cdktf.TerraformOutputConfig{
-	//	Value:     kube.Kubeconfig(),
-	//	Sensitive: jsii.Bool(true),
-	//})
-
+	//Save the kubeconfig file in your current directory
+	pwd, _ := os.Getwd()
 	file.NewFile(stack, jsii.String("kubeconfig"), &file.FileConfig{
-		Filename: jsii.String("kubeconfig.yaml"),
+		Filename: jsii.String(pwd + "/kubeconfig.yaml"),
 		Content:  kube.Kubeconfig(),
 	})
 
