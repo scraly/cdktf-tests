@@ -1,0 +1,6 @@
+tasks:
+  - init: brew install cdktf
+
+vscode:
+  extensions:
+    - "golang.go"
