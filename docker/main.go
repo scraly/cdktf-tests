@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"cdk.tf/go/stack/generated/kreuzwerker/docker/container"
 	"cdk.tf/go/stack/generated/kreuzwerker/docker/image"
 	"cdk.tf/go/stack/generated/kreuzwerker/docker/network"
@@ -15,6 +17,7 @@ const (
 	imageTag              = "linux-amd64"
 	gophersAPIPort        = 8080
 	gophersAPIWatcherPort = 8000
+	protocol              = "http://"
 )
 
 func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
@@ -38,8 +41,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 	})
 
 	// Create a Docker network to allows our containers to comunicate to each others
-	//TODO: xxxx
-	network.NewNetwork(stack, jsii.String("network"), &network.NetworkConfig{
+	gophersNetwork := network.NewNetwork(stack, jsii.String("network"), &network.NetworkConfig{
 		Name: jsii.String("gophers"),
 	})
 
@@ -48,18 +50,30 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 	// Create the Gophers API container
 	container.NewContainer(stack, jsii.String("gophersAPIContainer"), &container.ContainerConfig{
 		Image: gophersAPIImage.Name(),
-		Name:  jsii.String("gophers-api"),
+		Name:  jsii.String("gophers-api-gophers"),
 		Ports: &[]*container.ContainerPorts{{
 			Internal: jsii.Number(gophersAPIPort), External: jsii.Number(gophersAPIPort),
+		}},
+		NetworksAdvanced: &[]*container.ContainerNetworksAdvanced{{
+			Name:    gophersNetwork.Name(),
+			Aliases: jsii.Strings(*jsii.String("gophers-api-gophers")),
 		}},
 	})
 
 	// Create the Gophers API Watcher container
 	container.NewContainer(stack, jsii.String("gophersAPIWatcherContainer"), &container.ContainerConfig{
 		Image: gophersAPIWatcherImage.Name(),
-		Name:  jsii.String("gophers-api-watcher"),
+		Name:  jsii.String("gophers-api-watcher-gophers"),
 		Ports: &[]*container.ContainerPorts{{
 			Internal: jsii.Number(gophersAPIWatcherPort), External: jsii.Number(gophersAPIWatcherPort),
+		}},
+		Env: jsii.Strings(*jsii.String(fmt.Sprintf("PORT=%v", gophersAPIWatcherPort)),
+			*jsii.String(fmt.Sprintf("HTTP_PROXY=backend-gophers:%v", gophersAPIPort)),
+			*jsii.String(fmt.Sprintf("PROXY_PROTOCOL=%v", protocol)),
+		),
+		NetworksAdvanced: &[]*container.ContainerNetworksAdvanced{{
+			Name:    gophersNetwork.Name(),
+			Aliases: jsii.Strings(*jsii.String("gophers-api-watcher-gophers")),
 		}},
 	})
 
