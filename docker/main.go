@@ -12,16 +12,12 @@ import (
 )
 
 const (
-	//imageTag              = "linux-amd64"
 	backendPort  = 8080
 	frontendPort = 8000
-	protocol     = "http://"
 )
 
 func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 	stack := cdktf.NewTerraformStack(scope, &id)
-
-	// The code that defines your stack goes here
 
 	// Initialize the Docker provider
 	docker.NewDockerProvider(stack, jsii.String("docker"), &docker.DockerProviderConfig{})
@@ -32,7 +28,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		KeepLocally: jsii.Bool(false),
 	})
 
-	// Pull the Gophers API Watcher image
+	// Pull the Frontend Watcher image
 	frontendImage := image.NewImage(stack, jsii.String("frontendImage"), &image.ImageConfig{
 		Name:        jsii.String("scraly/frontend-docker:1.0.1"),
 		KeepLocally: jsii.Bool(false),
@@ -43,9 +39,7 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		Name: jsii.String("my_network"),
 	})
 
-	//ctx.Export("containerNetwork", network.Name)
-
-	// Create the Gophers API container
+	// Create the backend container
 	container.NewContainer(stack, jsii.String("backendContainer"), &container.ContainerConfig{
 		Image: backendImage.Name(),
 		Name:  jsii.String("backend"),
@@ -65,10 +59,6 @@ func NewMyStack(scope constructs.Construct, id string) cdktf.TerraformStack {
 		Ports: &[]*container.ContainerPorts{{
 			Internal: jsii.Number(frontendPort), External: jsii.Number(frontendPort),
 		}},
-		//Env: jsii.Strings(*jsii.String(fmt.Sprintf("PORT=%v", frontendPort)),
-		//	*jsii.String(fmt.Sprintf("HTTP_PROXY=backend-gophers:%v", backendPort)),
-		//	*jsii.String(fmt.Sprintf("PROXY_PROTOCOL=%v", protocol)),
-		//),
 		NetworksAdvanced: &[]*container.ContainerNetworksAdvanced{{
 			Name:    gophersNetwork.Name(),
 			Aliases: jsii.Strings(*jsii.String("my_network")),
